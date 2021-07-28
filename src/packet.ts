@@ -12,7 +12,7 @@ export const pong = t.type({
 })
 
 export const messagePayload = t.type({
-  roomId: t.string,
+  chatId: t.string,
   text: t.string,
   senderId: t.string,
 })

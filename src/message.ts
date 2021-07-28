@@ -29,7 +29,7 @@ export const parse = (msg: string): IOE.IOEither<ErrorParse, Message> => {
 
 export type Messages = SIO.StoreIO<string, MSG.Message>
 
-const MESSAGES = SIO.make()
+const MESSAGES: Messages = SIO.make()
 
 export const make = (msg: PKT.MessagePayload): IO.IO<MSG.Message> =>
   pipe(

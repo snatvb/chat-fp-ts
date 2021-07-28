@@ -38,7 +38,7 @@ interface Server {
   on(event: 'close', f: OnClose): void
 }
 
-export const createServer = (options: ServerOptions) =>
+export const createServer = (options?: ServerOptions) =>
   IO.of(() => {
     console.log(`WebSocket running on ${options?.port}`)
     return new WebSocket.Server(options)
@@ -57,5 +57,5 @@ export const run = (config: WSConfig) =>
   pipe(
     config.serverOptions,
     createServer,
-    IO.chain((ws) => attachListeners(ws(), config.listeners))
+    IO.chain((ws) => attachListeners(ws(), config.listeners)),
   )

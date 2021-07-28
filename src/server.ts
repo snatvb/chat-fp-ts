@@ -6,6 +6,7 @@ import * as IOE from 'fp-ts/lib/IOEither'
 
 import * as Chat from './chat'
 import * as C from './client'
+import * as H from './helpers'
 import * as MSG from './message'
 import * as PKT from './packet'
 import { ElementArrayOf } from './types'
@@ -35,6 +36,8 @@ const applyPackage =
         return pipe(
           MSG.make(packet.payload),
           IO.chain(MSG.save),
+          IO.map(H.prop('id')),
+          IO.chain((msgId) => Chat.saveMessageId(msgId)(packet.payload.chatId)),
           IOE.fromIO,
           IOE.mapLeft((e) => e as Error),
         )
@@ -82,10 +85,10 @@ const handleConnection =
           close: listeners.close?.map((handler) => handler(client)),
         }),
       ),
-      IO.chain(() => Console.log(`Client connected`)),
+      IO.chain((client) => Console.log(`Client ${client.id} connected`)),
     )()
 
-WS.run({
+const config: WS.WSConfig = {
   listeners: {
     connection: [
       handleConnection({
@@ -95,4 +98,6 @@ WS.run({
     ],
   },
   serverOptions: { port: 8080 },
-})()
+}
+
+WS.run(config)()
