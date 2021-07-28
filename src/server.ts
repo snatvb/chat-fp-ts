@@ -5,13 +5,13 @@ import * as IO from 'fp-ts/lib/IO'
 import * as IOE from 'fp-ts/lib/IOEither'
 
 import * as Chat from './chat'
-import * as Clients from './clients'
+import * as C from './client'
 import * as MSG from './message'
 import * as PKT from './packet'
 import { ElementArrayOf } from './types'
 import * as WS from './ws'
 
-type Client = Clients.Client
+type Client = C.Client
 
 const pingToJson = (packet: string) =>
   packet === 'ping' ? `{ "type": "ping" }` : packet
@@ -19,14 +19,14 @@ const pingToJson = (packet: string) =>
 const decodePacket = flow(pingToJson, PKT.parse)
 
 const applyPackage =
-  ([clientId, client]: [string, Client]) =>
+  (client: Client) =>
   (packet: PKT.Packet): IOE.IOEither<Error, any> => {
     switch (packet.type) {
       case 'ping':
         return IOE.right(void 0)
       case 'create_chat':
         return pipe(
-          Chat.make(packet.payload.title, clientId),
+          Chat.make(packet.payload.title, client.id),
           IO.chain(Chat.save),
           IOE.fromIO,
           IOE.mapLeft((e) => e as Error),
@@ -39,51 +39,51 @@ const applyPackage =
           IOE.mapLeft((e) => e as Error),
         )
       case 'pong':
-        return IOE.left(new Error(`Client ${clientId} sent pong.`))
+        return IOE.left(new Error(`Client ${client.id} sent pong.`))
     }
   }
 
-const handlePackage =
-  ([clientId, client]: [string, Client]) =>
-  (packet: string) =>
-    pipe(
-      packet,
-      decodePacket,
-      IOE.fromEither,
-      IOE.chainW(applyPackage([clientId, client])),
-      IOE.orLeft(Console.error),
-    )()
-
-const handleCloseConnection = ([clientId]: [string, Client]) =>
+const handlePackage = (client: Client) => (packet: string) =>
   pipe(
-    clientId,
-    Clients.remove,
+    packet,
+    decodePacket,
+    IOE.fromEither,
+    IOE.chainW(applyPackage(client)),
+    IOE.orLeft(Console.error),
+  )()
+
+const handleCloseConnection = (client: Client) =>
+  pipe(
+    client.id,
+    C.remove,
     IO.chain(
       flow(
-        E.map(() => `Client ${clientId} disconnected`),
+        E.map(() => `Client ${client.id} disconnected`),
         E.fold(Console.log, Console.error),
       ),
     ),
   )
 
 export type Listeners = {
-  [K in keyof Clients.Listeners]: Array<
-    (clientConfig: [string, Client]) => ElementArrayOf<Clients.Listeners[K]>
+  [K in keyof C.Listeners]: Array<
+    (client: Client) => ElementArrayOf<C.Listeners[K]>
   >
 }
 
-const handleConnection = (listeners: Partial<Listeners>) => (client: Client) =>
-  pipe(
-    client,
-    Clients.save,
-    IO.chain(([id, client]) =>
-      Clients.attachListeners(client, {
-        message: listeners.message?.map((handler) => handler([id, client])),
-        close: listeners.close?.map((handler) => handler([id, client])),
-      }),
-    ),
-    IO.chain(() => Console.log(`Client connected`)),
-  )()
+const handleConnection =
+  (listeners: Partial<Listeners>) => (client: C.WSClient) =>
+    pipe(
+      client,
+      C.make,
+      IO.chain(C.save),
+      IO.chain((client) =>
+        C.attachListeners(client, {
+          message: listeners.message?.map((handler) => handler(client)),
+          close: listeners.close?.map((handler) => handler(client)),
+        }),
+      ),
+      IO.chain(() => Console.log(`Client connected`)),
+    )()
 
 WS.run({
   listeners: {
