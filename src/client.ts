@@ -1,5 +1,5 @@
 import * as DATE from 'fp-ts/lib/Date'
-import { flow, pipe } from 'fp-ts/lib/function'
+import { apply, flow, pipe } from 'fp-ts/lib/function'
 import * as IO from 'fp-ts/lib/IO'
 import * as IOE from 'fp-ts/lib/IOEither'
 
@@ -58,7 +58,7 @@ export const sendPKT =
     return client
   }
 
-export const sendTo =
+export const sendById =
   (id: string) =>
   (packet: PKT.Packet): IOE.IOEither<Error, Client> =>
     pipe(
@@ -66,7 +66,8 @@ export const sendTo =
       get,
       IOE.chain(
         flow(
-          (client) => sendPKT(client)(packet),
+          sendPKT,
+          apply(packet),
           (io): IOE.IOEither<Error, Client> => IOE.fromIO(io),
         ),
       ),
