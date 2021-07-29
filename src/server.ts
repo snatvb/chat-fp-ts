@@ -29,7 +29,7 @@ export const handleSaveMessage = flow(
 export const saveMsgInChat = (msg: MSG.Message) =>
   pipe(
     Chat.get(msg.chatId),
-    IOE.chain(flow(Chat.saveMessageId(msg.id), H.ioToEIO<Error>())),
+    IOE.chain(flow(Chat.saveMessageId(msg.id), H.ioToIOE<Error>())),
     IOE.bindTo('chat'),
     IOE.map((res) => ({ ...res, message: msg })),
   )
@@ -56,7 +56,7 @@ const applyPackage =
           IO.chain(saveMsgInChat),
           IO.chain(Logger.inspect('Added message to chat')),
           IOE.chain(({ chat, message }) =>
-            pipe(message, Chat.sendMsgOut(chat), H.ioToEIO<Error>()),
+            pipe(message, Chat.sendMsgOut(chat), H.ioToIOE<Error>()),
           ),
           IOE.map(Logger.inspect('Sent out message')),
           IOE.map(() => void 0),

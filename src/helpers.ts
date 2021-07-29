@@ -9,7 +9,7 @@ export const prop =
 export const True = () => true
 export const False = () => false
 
-export const ioToEIO =
+export const ioToIOE =
   <E>() =>
   <A>(io: IO.IO<A>): IOE.IOEither<E, A> =>
     IO.chain((x: A) => IOE.of<E, A>(x))(io)

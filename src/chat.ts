@@ -7,7 +7,6 @@ import { Lens } from 'monocle-ts'
 
 import * as C from './client'
 import * as H from './helpers'
-import * as Logger from './logger'
 import * as MSG from './message'
 import * as PKT from './packet'
 import * as SIO from './StoreIO'
@@ -53,7 +52,7 @@ export const saveMessageIdByChatId = (msgId: string) =>
   flow(
     get,
     IOE.map(addMessageId(msgId)),
-    IOE.chain(flow(save, H.ioToEIO<Error>())),
+    IOE.chain(flow(save, H.ioToIOE<Error>())),
   )
 
 export const saveMessageId = (msgId: string) => flow(addMessageId(msgId), save)
@@ -76,5 +75,4 @@ export const sendMsgOut = (chat: Chat) => (msg: MSG.Message) =>
           >,
       ),
     ),
-    Logger.inspect('Message out'),
   )
