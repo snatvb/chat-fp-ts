@@ -5,7 +5,11 @@ import * as IO from 'fp-ts/lib/IO'
 import * as IOE from 'fp-ts/lib/IOEither'
 import { Lens } from 'monocle-ts'
 
+import * as C from './client'
+import * as H from './helpers'
+import * as Logger from './logger'
 import * as MSG from './message'
+import * as PKT from './packet'
 import * as SIO from './StoreIO'
 import * as uuid from './uuid'
 
@@ -14,6 +18,7 @@ export type Chat = {
   ownerId: string
   title: string
   createAt: number
+  members: string[]
   messages: string[] // ids only
 }
 
@@ -29,6 +34,7 @@ export const make = (title: string, ownerId: string): IO.IO<Chat> =>
       title,
       ownerId,
       createAt,
+      members: [],
       messages: [],
     })),
   )
@@ -43,5 +49,32 @@ export const addMessageId =
   (chat: Chat): Chat =>
     pipe(chat, messages.modify(A.append(msgId)))
 
-export const saveMessageId = (msgId: string) =>
-  flow(get, IOE.map(addMessageId(msgId)), IOE.chain(flow(save, IOE.fromIO)))
+export const saveMessageIdByChatId = (msgId: string) =>
+  flow(
+    get,
+    IOE.map(addMessageId(msgId)),
+    IOE.chain(flow(save, H.ioToEIO<Error>())),
+  )
+
+export const saveMessageId = (msgId: string) => flow(addMessageId(msgId), save)
+
+const msgToPkt = (msg: MSG.Message): PKT.Packet => ({
+  type: 'received_message',
+  payload: msg,
+})
+
+export const sendMsgOut = (chat: Chat) => (msg: MSG.Message) =>
+  pipe(
+    chat.members,
+    A.map(C.get),
+    IO.traverseArray(
+      IOE.chain(
+        (client) =>
+          pipe(msg, msgToPkt, C.sendPKT(client), IOE.fromIO) as IOE.IOEither<
+            SIO.NotFoundError,
+            C.Client
+          >,
+      ),
+    ),
+    Logger.inspect('Message out'),
+  )

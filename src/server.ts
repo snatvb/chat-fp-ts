@@ -15,38 +15,54 @@ import * as WS from './ws'
 
 type Client = C.Client
 
-const pingToJson = (packet: string) =>
+export const pingToJson = (packet: string) =>
   packet === 'ping' ? `{ "type": "ping" }` : packet
 
-const decodePacket = flow(pingToJson, PKT.parse)
+export const decodePacket = flow(pingToJson, PKT.parse)
+
+export const handleSaveMessage = flow(
+  MSG.make,
+  IO.chain(MSG.save),
+  IO.chain(Logger.inspect('Received message')),
+)
+
+export const saveMsgInChat = (msg: MSG.Message) =>
+  pipe(
+    Chat.get(msg.chatId),
+    IOE.chain(flow(Chat.saveMessageId(msg.id), H.ioToEIO<Error>())),
+    IOE.bindTo('chat'),
+    IOE.map((res) => ({ ...res, message: msg })),
+  )
 
 const applyPackage =
   (client: Client) =>
-  (packet: PKT.Packet): IOE.IOEither<Error, unknown> => {
+  (packet: PKT.Packet): IOE.IOEither<Error, void> => {
     switch (packet.type) {
       case 'ping':
-        return IOE.right(void 0)
+        return IOE.right<Error, void>(void 0)
       case 'create_chat':
         return pipe(
           Chat.make(packet.payload.title, client.id),
           IO.chain(Chat.save),
           IO.chain(Logger.inspect('Chat created')),
-          IOE.fromIO,
-          IOE.mapLeft((e) => e as Error),
+          IO.chain(() => IOE.right<Error, void>(void 0)),
         )
       case 'message':
         return pipe(
-          MSG.make(packet.payload),
-          IO.chain(MSG.save),
-          IO.chain(Logger.inspect('Received message')),
-          IO.map(H.prop('id')),
-          IO.chain((msgId) => Chat.saveMessageId(msgId)(packet.payload.chatId)),
+          packet.payload,
+          handleSaveMessage,
+          IO.chain(saveMsgInChat),
           IO.chain(Logger.inspect('Added message to chat')),
-          IOE.fromIO,
-          IOE.mapLeft((e) => e as Error),
+          IOE.chain(({ chat, message }) =>
+            pipe(message, Chat.sendMsgOut(chat), H.ioToEIO<Error>()),
+          ),
+          IOE.map(Logger.inspect('Sent out message')),
+          IOE.map(() => void 0),
         )
-      case 'pong':
-        return IOE.left(new Error(`Client ${client.id} sent pong.`))
+      default:
+        return IOE.left<Error, void>(
+          new Error(`Client ${client.id} unknown package.`),
+        )
     }
   }
 

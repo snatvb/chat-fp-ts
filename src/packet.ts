@@ -22,6 +22,17 @@ export const message = t.type({
   payload: messagePayload,
 })
 
+export const receivedMessage = t.type({
+  type: t.literal('received_message'),
+  payload: t.type({
+    id: t.string,
+    text: t.string,
+    ownerId: t.string,
+    chatId: t.string,
+    timestamp: t.number,
+  }),
+})
+
 export const createChat = t.type({
   type: t.literal('create_chat'),
   payload: t.type({
@@ -29,13 +40,20 @@ export const createChat = t.type({
   }),
 })
 
-export const packet = t.union([ping, pong, message, createChat])
+export const packet = t.union([
+  ping,
+  pong,
+  message,
+  createChat,
+  receivedMessage,
+])
 
 export type Ping = t.TypeOf<typeof ping>
 export type Pong = t.TypeOf<typeof pong>
 
 export type MessagePayload = t.TypeOf<typeof messagePayload>
 export type Message = t.TypeOf<typeof message>
+export type ReceivedMessage = t.TypeOf<typeof receivedMessage>
 
 export type Packet = t.TypeOf<typeof packet>
 

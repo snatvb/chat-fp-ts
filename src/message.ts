@@ -7,12 +7,7 @@ import * as PKT from './packet'
 import * as SIO from './StoreIO'
 import * as uuid from './uuid'
 
-export type Message = {
-  id: string
-  text: string
-  ownerId: string
-  timestamp: number
-}
+export type Message = PKT.ReceivedMessage['payload']
 
 class ErrorWrongJSON extends Error {}
 
@@ -36,6 +31,7 @@ export const make = (msg: PKT.MessagePayload): IO.IO<MSG.Message> =>
     uuid.generate(),
     IO.map((id) => ({
       id,
+      chatId: msg.chatId,
       timestamp: Date.now(),
       text: msg.text,
       ownerId: msg.senderId,
