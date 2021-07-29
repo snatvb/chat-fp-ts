@@ -8,6 +8,7 @@
         "strictBindCallApply": true,
         "strictFunctionTypes": true,
         "strictNullChecks": true,
+        "noUncheckedIndexedAccess": true,
         "noImplicitAny": true,
         "moduleResolution": "node",
         "sourceMap": true,

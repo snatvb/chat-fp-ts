@@ -53,7 +53,7 @@ export const attachListeners =
     return ws
   }
 
-export const run = (config: WSConfig) =>
+export const create = (config: WSConfig) =>
   pipe(
     config.serverOptions,
     createServer,
