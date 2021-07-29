@@ -40,6 +40,7 @@ const applyPackage =
     switch (packet.type) {
       case 'ping':
         return IOE.right<Error, void>(void 0)
+
       case 'create_chat':
         return pipe(
           Chat.make(packet.payload.title, client.id),
@@ -47,6 +48,7 @@ const applyPackage =
           IO.chain(Logger.inspect('Chat created')),
           IO.chain(() => IOE.right<Error, void>(void 0)),
         )
+
       case 'message':
         return pipe(
           packet.payload,
@@ -59,9 +61,10 @@ const applyPackage =
           IOE.map(Logger.inspect('Sent out message')),
           IOE.map(() => void 0),
         )
+
       default:
         return IOE.left<Error, void>(
-          new Error(`Client ${client.id} unknown package.`),
+          new Error(`Client sent ${client.id} unknown package.`),
         )
     }
   }
