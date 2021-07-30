@@ -120,7 +120,7 @@ const logDelay = (status: RetryStatus) =>
       pipe(
         status.previousDelay,
         O.map((delay) => `retrying in ${delay} milliseconds...`),
-        O.getOrElse(() => 'first attempt...'),
+        O.getOrElse(() => 'Connecting...'),
       ),
     ),
   )

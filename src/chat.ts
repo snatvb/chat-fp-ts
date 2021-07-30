@@ -4,11 +4,11 @@ import { flow, pipe } from 'fp-ts/lib/function'
 import * as IO from 'fp-ts/lib/IO'
 import * as IOE from 'fp-ts/lib/IOEither'
 import { Lens } from 'monocle-ts'
+import * as PKT from 'shared/Packet'
 
 import * as C from './client'
 import * as H from './helpers'
 import * as MSG from './message'
-import * as PKT from './packet'
 import * as SIO from './StoreIO'
 import * as uuid from './uuid'
 
@@ -28,14 +28,16 @@ export const make = (title: string, ownerId: string): IO.IO<Chat> =>
     uuid.generate(),
     IO.bindTo('id'),
     IO.bind('createAt', () => DATE.now),
-    IO.map(({ id, createAt }) => ({
-      id,
-      title,
-      ownerId,
-      createAt,
-      members: [],
-      messages: [],
-    })),
+    IO.map(
+      ({ id, createAt }): Chat => ({
+        id,
+        title,
+        ownerId,
+        createAt,
+        members: [],
+        messages: [],
+      }),
+    ),
   )
 
 export const save = (chat: Chat) => SIO.write(chat.id, chat, LIVE_CHATS)

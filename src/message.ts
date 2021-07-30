@@ -1,9 +1,9 @@
 import { pipe } from 'fp-ts/lib/function'
 import * as IO from 'fp-ts/lib/IO'
 import * as IOE from 'fp-ts/lib/IOEither'
+import * as PKT from 'shared/Packet'
 
 import * as MSG from './message'
-import * as PKT from './packet'
 import * as SIO from './StoreIO'
 import * as uuid from './uuid'
 

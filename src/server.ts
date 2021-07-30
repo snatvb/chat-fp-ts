@@ -3,13 +3,13 @@ import * as E from 'fp-ts/lib/Either'
 import { flow, pipe } from 'fp-ts/lib/function'
 import * as IO from 'fp-ts/lib/IO'
 import * as IOE from 'fp-ts/lib/IOEither'
+import * as PKT from 'shared/Packet'
 
 import * as Chat from './chat'
 import * as C from './client'
 import * as H from './helpers'
 import * as Logger from './logger'
 import * as MSG from './message'
-import * as PKT from './packet'
 import { ElementArrayOf } from './types'
 import * as WS from './ws'
 
@@ -101,6 +101,11 @@ const handleConnection =
     pipe(
       client,
       C.make,
+      IO.map((client) => {
+        console.log('asd')
+        setTimeout(() => client.socket.send('hi'), 200) // FIXME: DELETE
+        return client
+      }),
       IO.chain(C.save),
       IO.chain((client) =>
         C.attachListeners(client, {

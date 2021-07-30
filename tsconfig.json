@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "module": "commonjs",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -13,11 +14,13 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
-    "baseUrl": ".",
+    "typeRoots": ["node_modules/@types", "src/typings"],
+    "resolveJsonModule": true,
     "paths": {
-      "*": ["node_modules/*", "src/types/*"],
-      "shared/*": ["shared/*"]
+      "shared/*": ["./shared/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
+  "references": [{ "path": "./shared" }]
 }
