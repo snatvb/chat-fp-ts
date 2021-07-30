@@ -1,9 +1,8 @@
 import * as Logger from 'fp-ts/lib/Console'
 import { now } from 'fp-ts/lib/Date'
 import * as E from 'fp-ts/lib/Either'
-import { constant, Lazy, pipe } from 'fp-ts/lib/function'
+import { Lazy, pipe } from 'fp-ts/lib/function'
 import * as IO from 'fp-ts/lib/IO'
-import * as IOE from 'fp-ts/lib/IOEither'
 import * as O from 'fp-ts/lib/Option'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {
