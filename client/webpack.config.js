@@ -18,6 +18,7 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
     alias: {
       '~': path.resolve(__dirname, 'src'),
+      shared: path.resolve(__dirname, '../shared'),
     },
   },
   devtool: isProd ? false : 'inline-source-map',
