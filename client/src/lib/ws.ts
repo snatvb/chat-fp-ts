@@ -17,14 +17,10 @@ import {
 import { retrying } from 'retry-ts/lib/Task'
 import * as H from '~/helpers'
 
-export interface ConnectionError {
-  readonly type:
-    | 'Connection timed out'
-    | 'Invalid url'
-    | 'The server responded with a connection error'
-    | 'Connection has been closed'
-  readonly timestamp: number
-}
+export class ServerUnreachedError extends Error {}
+export class TimeoutConnectionError extends Error {}
+
+export type ConnectionError = ServerUnreachedError | TimeoutConnectionError
 
 export type OnClose = (event: CloseEvent) => void
 export type OnError = (event: Event) => void
@@ -77,12 +73,14 @@ export const attachListeners =
 
 export const tryConnection =
   (timeoutTime: number) =>
-  (ws: WebSocket): TE.TaskEither<Error, WebSocket> =>
+  (ws: WebSocket): TE.TaskEither<ConnectionError, WebSocket> =>
   () =>
     new Promise((resolve) => {
       const timeout = H.timeout.make(timeoutTime)
       const stopTimeout = H.timeout.fork(() => {})(() =>
-        resolve(E.left(new Error('Connection timeout'))),
+        resolve(
+          E.left(new TimeoutConnectionError(`[${now()}] Connection timeout`)),
+        ),
       )(timeout)
       ws.addEventListener('open', () => {
         stopTimeout()
@@ -90,13 +88,17 @@ export const tryConnection =
       })
       ws.addEventListener('error', (error) => {
         stopTimeout()
-        resolve(E.left(new Error(`[${error.timeStamp}] Connection fault`)))
+        resolve(
+          E.left(
+            new ServerUnreachedError(`[${error.timeStamp}] Connection fault`),
+          ),
+        )
       })
     })
 
 export const make = <A extends typeof WebSocket>(
   config: Config<A>,
-): TE.TaskEither<Error, WebSocket> => {
+): TE.TaskEither<ConnectionError, WebSocket> => {
   return pipe(
     () => new config.webSocketConstructor(config.endpoint, config.protocols),
     IO.chain(
@@ -126,7 +128,7 @@ const logDelay = (status: RetryStatus) =>
 
 export const makeWithReconnection = <A extends typeof WebSocket>(
   config: Config<A>,
-): TE.TaskEither<Error, WebSocket> =>
+): TE.TaskEither<ConnectionError, WebSocket> =>
   retrying(
     config.retryPolicy ?? DEFAULT_RETRY_POLICY,
     (status) =>
