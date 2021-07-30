@@ -26,6 +26,13 @@ export type OnError = (event: Event) => void
 export type OnMessage = (event: MessageEvent) => void
 export type OnOpen = (event: Event) => void
 
+export enum ConnectionStatus {
+  Open = 'Open',
+  Closed = 'Closed',
+  Closing = 'Closing',
+  Connecting = 'Connecting',
+}
+
 export interface EventListeners {
   open: OnOpen[]
   close: OnClose[]

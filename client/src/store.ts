@@ -1,5 +1,7 @@
-import { applyMiddleware, createStore, compose, combineReducers } from 'redux'
+import { applyMiddleware, combineReducers, compose, createStore } from 'redux'
 import { StateType } from 'typesafe-actions'
+
+import actions from './actions'
 import { middlewares, runSagas } from './middlewares'
 import rootReducer from './reducers'
 
@@ -9,6 +11,7 @@ const combinedReducer = combineReducers(rootReducer)
 const store = createStore(combinedReducer, undefined, composedEnhancers)
 
 runSagas()
+store.dispatch(actions.app.initialize())
 
 export type State = StateType<typeof combinedReducer>
 
