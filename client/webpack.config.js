@@ -2,6 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const Dotenv = require('dotenv-webpack')
 
 const isProd = process.env.NODE_ENV === 'production'
 const isDev = !isProd
@@ -78,6 +79,7 @@ module.exports = {
       NODE_ENV: 'development',
       DEBUG: false,
     }),
+    new Dotenv(),
   ],
   devServer: {
     contentBase: path.resolve(__dirname, 'public'),

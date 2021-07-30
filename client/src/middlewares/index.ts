@@ -1,6 +1,9 @@
-import * as sagas from './sagas'
+import thunk from 'redux-thunk'
 
-export const middlewares = [sagas.middleware]
+import * as sagas from './sagas'
+import ws from './ws'
+
+export const middlewares = [ws, sagas.middleware, thunk]
 
 export const runSagas = () => {
   sagas.run()

@@ -6,3 +6,4 @@ dist/
 .npm
 *.log
 .DS_Store
+.env

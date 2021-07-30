@@ -3,7 +3,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "target": "es6",
-    "module": "commonjs",
+    "module": "es6",
     "allowJs": true,
     "jsx": "react",
     "outDir": "./dist",
