@@ -1,0 +1,20 @@
+.base {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-size: 72px;
+  font-weight: normal;
+}
+
+.description {
+  font-size: 32px;
+}
+
+.link {
+  font-size: 24px;
+  color: #2c8ebb;
+}

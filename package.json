@@ -7,7 +7,9 @@
     "watch-ts": "tsc -w",
     "watch-server": "nodemon --delay 500ms --watch ./dist dist/server.js",
     "start": "concurrently \"tsc\" \"npm:watch-ts\" \"npm:watch-server\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "husky install",
+    "prepare": "husky install"
   },
   "keywords": [
     "fp",
@@ -26,7 +28,10 @@
     "@types/uuid": "^8.3.1",
     "@types/ws": "^7.4.7",
     "concurrently": "^6.2.0",
+    "husky": "^7.0.1",
     "nodemon": "^2.0.12",
+    "prettier": "^2.3.2",
+    "prettier-check": "^2.0.0",
     "typescript": "^4.3.5"
   },
   "dependencies": {

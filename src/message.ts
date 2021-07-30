@@ -26,7 +26,7 @@ export type Messages = SIO.StoreIO<string, MSG.Message>
 
 const MESSAGES: Messages = SIO.make()
 
-export const make = (msg: PKT.MessagePayload): IO.IO<MSG.Message> =>
+export const make = (msg: PKT.Message['payload']): IO.IO<MSG.Message> =>
   pipe(
     uuid.generate(),
     IO.map((id) => ({

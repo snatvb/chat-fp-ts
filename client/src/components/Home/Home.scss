@@ -1,0 +1,19 @@
+.base {
+  display: flex;
+  font-size: 24px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.button {
+  color: #eee;
+  border-radius: 5px;
+  background-color: #ff9500;
+  border: none;
+  padding: 3px 18px;
+
+  & + & {
+    margin-left: 10px;
+  }
+}
