@@ -1,11 +1,11 @@
-import * as Logger from 'fp-ts/lib/Console'
 import * as E from 'fp-ts/lib/Either'
-import { pipe } from 'fp-ts/lib/function'
+import { flow, pipe } from 'fp-ts/lib/function'
 import * as IO from 'fp-ts/lib/IO'
 import * as IOE from 'fp-ts/lib/IOEither'
 import * as O from 'fp-ts/lib/Option'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { Middleware } from 'redux'
+import * as Logger from 'shared/Console'
 import * as PKT from 'shared/Packet'
 import { getType } from 'typesafe-actions'
 import actions, { Action } from '~/actions'
@@ -21,11 +21,18 @@ const middleware: Middleware<{}, State> = (redux) => {
       E.map(redux.dispatch),
       IOE.fromEither,
       IOE.orLeft(Logger.warn),
-    )
+    )()
 
   const handleOpen = () =>
     pipe(
       WS.ConnectionStatus.Open,
+      actions.ws.setConnectionStatus,
+      redux.dispatch,
+    )
+
+  const handleClose = () =>
+    pipe(
+      WS.ConnectionStatus.Closed,
       actions.ws.setConnectionStatus,
       redux.dispatch,
     )
@@ -43,6 +50,7 @@ const middleware: Middleware<{}, State> = (redux) => {
     eventListeners: {
       open: [handleOpen],
       message: [handleMessage],
+      close: [handleClose],
     },
   }
 
@@ -63,10 +71,18 @@ const middleware: Middleware<{}, State> = (redux) => {
         TE.rightIO<WS.ConnectionError, WebSocket>(x),
       ),
     ),
+    TE.mapLeft((error) => pipe(handleClose(), TE.left(error))),
   )
 
+  const isCloseAction = (action: Action) =>
+    action.type === getType(actions.ws.setConnectionStatus) &&
+    action.payload.status === WS.ConnectionStatus.Closed
+
   return (next) => async (action: Action) => {
-    if (action.type === getType(actions.app.initialize)) {
+    if (
+      action.type === getType(actions.app.initialize) ||
+      isCloseAction(action)
+    ) {
       await connect()
     }
     return next(action)

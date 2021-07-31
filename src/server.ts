@@ -101,10 +101,6 @@ const handleConnection =
     pipe(
       client,
       C.make,
-      IO.map((client) => {
-        setTimeout(() => client.socket.send('hi'), 200) // FIXME: DELETE
-        return client
-      }),
       IO.chain(C.save),
       IO.chain((client) =>
         C.attachListeners(client, {

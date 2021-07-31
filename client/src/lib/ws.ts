@@ -1,7 +1,7 @@
 import * as Logger from 'fp-ts/lib/Console'
 import { now } from 'fp-ts/lib/Date'
 import * as E from 'fp-ts/lib/Either'
-import { Lazy, pipe } from 'fp-ts/lib/function'
+import { apply, Lazy, pipe } from 'fp-ts/lib/function'
 import * as IO from 'fp-ts/lib/IO'
 import * as O from 'fp-ts/lib/Option'
 import * as TE from 'fp-ts/lib/TaskEither'
@@ -108,14 +108,17 @@ export const make = <A extends typeof WebSocket>(
   return pipe(
     () => new config.webSocketConstructor(config.endpoint, config.protocols),
     IO.chain(
-      attachListeners({
-        ...DEFAULT_EVENT_LISTENERS,
-        ...config.eventListeners,
-      }),
+      tryConnection(config.connectionTimeout ?? DEFAULT_CONNECTION_TIMEOUT),
     ),
-    IO.chain(
+    TE.chain((ws) =>
       pipe(
-        tryConnection(config.connectionTimeout ?? DEFAULT_CONNECTION_TIMEOUT),
+        {
+          ...DEFAULT_EVENT_LISTENERS,
+          ...config.eventListeners,
+        },
+        attachListeners,
+        apply(ws),
+        (x) => TE.rightIO<ConnectionError, WebSocket>(x),
       ),
     ),
   )
