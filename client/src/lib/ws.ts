@@ -61,19 +61,18 @@ export const DEFAULT_CONNECTION_TIMEOUT = 5000
 
 export const DEFAULT_RETRY_POLICY = capDelay(
   DEFAULT_CONNECTION_TIMEOUT,
-  Monoid.concat(exponentialBackoff(200), limitRetries(5)),
+  Monoid.concat(exponentialBackoff(200), limitRetries(Infinity)),
 )
 
 export const attachListeners =
-  (listeners: EventListeners) =>
+  (listeners: Partial<EventListeners>) =>
   (ws: WebSocket): IO.IO<WebSocket> =>
   () => {
-    Object.keys(listeners).forEach((key) => {
-      const eventName = key as keyof EventListeners
-      listeners[eventName].forEach((listener) =>
-        ws.addEventListener(eventName, listener as any),
+    for (const [key, listenersByName] of Object.entries(listeners)) {
+      listenersByName.forEach((listener) =>
+        ws.addEventListener(key as keyof EventListeners, listener as any),
       )
-    })
+    }
     return ws
   }
 
@@ -108,13 +107,22 @@ export const make = <A extends typeof WebSocket>(
   return pipe(
     () => new config.webSocketConstructor(config.endpoint, config.protocols),
     IO.chain(
+      attachListeners({
+        ...DEFAULT_EVENT_LISTENERS,
+        ...config.eventListeners,
+        close: [],
+      }),
+    ),
+    IO.chain(
       tryConnection(config.connectionTimeout ?? DEFAULT_CONNECTION_TIMEOUT),
     ),
     TE.chain((ws) =>
       pipe(
         {
-          ...DEFAULT_EVENT_LISTENERS,
-          ...config.eventListeners,
+          close: [
+            ...DEFAULT_EVENT_LISTENERS.close,
+            ...(config.eventListeners?.close ?? []),
+          ],
         },
         attachListeners,
         apply(ws),
@@ -129,7 +137,7 @@ const logDelay = (status: RetryStatus) =>
     Logger.log(
       pipe(
         status.previousDelay,
-        O.map((delay) => `retrying in ${delay} milliseconds...`),
+        O.map((delay) => `Retrying connection in ${delay} milliseconds...`),
         O.getOrElse(() => 'Connecting...'),
       ),
     ),
