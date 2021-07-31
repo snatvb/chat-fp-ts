@@ -1,5 +1,6 @@
 import 'normalize.css'
 import './global.scss'
+import 'rsuite/dist/styles/rsuite-dark.css'
 
 import React from 'react'
 import ReactDOM from 'react-dom'

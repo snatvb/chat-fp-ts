@@ -1,14 +1,15 @@
 import React from 'react'
 import { Route, Switch } from 'react-router'
-import { NotFound } from '~/components/NotFound'
+import { AuthorizedRouter } from '~/routers/AuthorizedRouter'
 
+import Auth from './Auth/Auth'
 import { Main } from './Main'
 
 export const Entry = () => {
   return (
     <Switch>
-      <Route path="/" exact component={Main} />
-      <Route component={NotFound} />
+      <Route path="/login" component={Auth} />
+      <AuthorizedRouter path="/" fallback="/login" component={Main} />
     </Switch>
   )
 }

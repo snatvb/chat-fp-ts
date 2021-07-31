@@ -8,7 +8,7 @@ export const Main = React.memo(() => {
     <div className={styles.base}>
       <Home />
       {process.env.NODE_ENV === 'development' && (
-        <div className={styles.devMode}>this is development mode</div>
+        <div className={styles.devMode}>development mode</div>
       )}
     </div>
   )

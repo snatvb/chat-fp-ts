@@ -1,7 +1,9 @@
-import { reduceCounter } from './counter'
+import auth from './auth'
+import counter from './counter'
 
 const reducers = {
-  counter: reduceCounter,
+  counter,
+  auth,
 }
 
 export default reducers

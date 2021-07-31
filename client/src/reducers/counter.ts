@@ -1,6 +1,5 @@
 import { Reducer } from 'redux'
 import { getType } from 'typesafe-actions'
-
 import { Action } from '~/actions'
 import { add, reset } from '~/actions/counter'
 
@@ -12,7 +11,7 @@ const initialState: CounterState = {
   value: 0,
 }
 
-export const reduceCounter: Reducer<CounterState, Action> = (
+export const reduce: Reducer<CounterState, Action> = (
   state = initialState,
   action: Action,
 ) => {
@@ -25,3 +24,5 @@ export const reduceCounter: Reducer<CounterState, Action> = (
       return state
   }
 }
+
+export default reduce
