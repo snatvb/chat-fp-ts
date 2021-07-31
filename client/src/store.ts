@@ -13,6 +13,10 @@ const store = createStore(combinedReducer, undefined, composedEnhancers)
 runSagas()
 store.dispatch(actions.app.initialize())
 
+if (process.env.NODE_ENV === 'development') {
+  ;(window as any).$store = store
+}
+
 export type State = StateType<typeof combinedReducer>
 
 export default store
