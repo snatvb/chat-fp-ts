@@ -8,18 +8,12 @@ import * as H from 'shared/helpers'
 import * as PKT from 'shared/Packet'
 
 import * as C from './client'
+import { pack } from './helpers'
 import * as MSG from './message'
 import * as SIO from './StoreIO'
 import * as uuid from './uuid'
 
-export type Chat = {
-  id: string
-  ownerId: string
-  title: string
-  createAt: number
-  members: string[]
-  messages: string[] // ids only
-}
+export type Chat = PKT.Chat
 
 export const LIVE_CHATS = SIO.make<string, Chat>()
 
@@ -59,7 +53,7 @@ export const saveMessageIdByChatId = (msgId: string) =>
 
 export const saveMessageId = (msgId: string) => flow(addMessageId(msgId), save)
 
-const msgToPkt = (msg: MSG.Message): PKT.Packet => ({
+const msgToPktMsg = (msg: MSG.Message): PKT.PacketMessage => ({
   type: 'received_message',
   payload: msg,
 })
@@ -71,10 +65,13 @@ export const sendMsgOut = (chat: Chat) => (msg: MSG.Message) =>
     IO.traverseArray(
       IOE.chain(
         (client) =>
-          pipe(msg, msgToPkt, C.sendPKT(client), IOE.fromIO) as IOE.IOEither<
-            SIO.NotFoundError,
-            C.Client
-          >,
+          pipe(
+            msg,
+            msgToPktMsg,
+            pack,
+            IO.chain(C.sendPKT(client)),
+            IOE.fromIO,
+          ) as IOE.IOEither<SIO.NotFoundError, C.Client>,
       ),
     ),
   )

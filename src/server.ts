@@ -44,7 +44,7 @@ const applyPackage =
       case 'ping':
         return IOE.right<Error, void>(void 0)
 
-      case 'create_chat':
+      case 'request_create_chat':
         return pipe(
           Chat.make(packet.payload.title, client.id),
           IO.chain(Chat.save),
@@ -52,7 +52,7 @@ const applyPackage =
           IO.chain(() => IOE.right<Error, void>(void 0)),
         )
 
-      case 'message':
+      case 'send_message':
         return pipe(
           packet.payload,
           handleSaveMessage,

@@ -1,5 +1,6 @@
 import * as E from 'fp-ts/lib/Either'
-import { flow } from 'fp-ts/lib/function'
+import { flow, pipe } from 'fp-ts/lib/function'
+import * as IO from 'fp-ts/lib/IO'
 import * as J from 'fp-ts/lib/Json'
 import * as t from 'io-ts'
 
@@ -11,8 +12,8 @@ export const pong = t.type({
   type: t.literal('pong'),
 })
 
-export const message = t.type({
-  type: t.literal('message'),
+export const sendMessage = t.type({
+  type: t.literal('send_message'),
   payload: t.type({
     chatId: t.string,
     text: t.string,
@@ -31,8 +32,24 @@ export const receivedMessage = t.type({
   }),
 })
 
-export const createChat = t.type({
-  type: t.literal('create_chat'),
+export const chat = t.type({
+  id: t.string,
+  ownerId: t.string,
+  title: t.string,
+  createAt: t.number,
+  members: t.array(t.string),
+  messages: t.array(t.string),
+})
+
+export const requestCreateChat = t.type({
+  type: t.literal('request_create_chat'),
+  payload: t.type({
+    title: t.string,
+  }),
+})
+
+export const responseChatCreated = t.type({
+  type: t.literal('response_chat_created'),
   payload: t.type({
     title: t.string,
   }),
@@ -68,21 +85,23 @@ export const packetMessage = t.union([
   findUser,
   requestUser,
   responseUser,
-  message,
-  createChat,
+  sendMessage,
+  requestCreateChat,
   receivedMessage,
 ])
 
 export const packet = t.type({
-  id: t.string,
+  id: t.number,
   payload: packetMessage,
 })
 
 export type Ping = t.TypeOf<typeof ping>
 export type Pong = t.TypeOf<typeof pong>
 
+export type Chat = t.TypeOf<typeof chat>
 export type User = t.TypeOf<typeof user>
-export type Message = t.TypeOf<typeof message>
+export type Message = t.TypeOf<typeof sendMessage>
+
 export type ReceivedMessage = t.TypeOf<typeof receivedMessage>
 
 export type PacketMessage = t.TypeOf<typeof packetMessage>
@@ -92,3 +111,11 @@ export const parse = flow(
   J.parse as (s: string) => E.Either<Error, J.Json>,
   E.chainW(packet.decode),
 )
+
+export const createPack =
+  (getId: IO.IO<number>) =>
+  (pktMsg: PacketMessage): IO.IO<Packet> =>
+    pipe(
+      getId,
+      IO.map((id) => ({ id, payload: pktMsg })),
+    )
