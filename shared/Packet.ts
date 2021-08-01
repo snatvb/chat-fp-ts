@@ -62,7 +62,7 @@ export const findUser = t.type({
   }),
 })
 
-export const packet = t.union([
+export const packetMessage = t.union([
   ping,
   pong,
   findUser,
@@ -73,6 +73,11 @@ export const packet = t.union([
   receivedMessage,
 ])
 
+export const packet = t.type({
+  id: t.string,
+  payload: packetMessage,
+})
+
 export type Ping = t.TypeOf<typeof ping>
 export type Pong = t.TypeOf<typeof pong>
 
@@ -80,6 +85,7 @@ export type User = t.TypeOf<typeof user>
 export type Message = t.TypeOf<typeof message>
 export type ReceivedMessage = t.TypeOf<typeof receivedMessage>
 
+export type PacketMessage = t.TypeOf<typeof packetMessage>
 export type Packet = t.TypeOf<typeof packet>
 
 export const parse = flow(

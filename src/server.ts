@@ -36,7 +36,10 @@ export const saveMsgInChat = (msg: MSG.Message) =>
 
 const applyPackage =
   (client: Client) =>
-  (packet: PKT.Packet): IOE.IOEither<Error, void> => {
+  ({
+    payload: packet,
+    id: packetId,
+  }: PKT.Packet): IOE.IOEither<Error, void> => {
     switch (packet.type) {
       case 'ping':
         return IOE.right<Error, void>(void 0)
