@@ -13,3 +13,8 @@ export const ioToIOE =
   <E>() =>
   <A>(io: IO.IO<A>): IOE.IOEither<E, A> =>
     IO.chain((x: A) => IOE.of<E, A>(x))(io)
+
+// export enum LoadingState {
+//   Pending = 'pending',
+//   Failure = 'failure',
+// }
