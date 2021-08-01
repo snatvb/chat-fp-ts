@@ -38,9 +38,36 @@ export const createChat = t.type({
   }),
 })
 
+export const user = t.type({
+  id: t.string,
+  displayName: t.string,
+  username: t.string,
+  avatar: t.union([t.string, t.undefined]),
+})
+
+export const requestUser = t.type({
+  type: t.literal('request_user'),
+  payload: t.type({ id: t.string }),
+})
+
+export const responseUser = t.type({
+  type: t.literal('response_user'),
+  payload: user,
+})
+
+export const findUser = t.type({
+  type: t.literal('response_user'),
+  payload: t.type({
+    username: t.string,
+  }),
+})
+
 export const packet = t.union([
   ping,
   pong,
+  findUser,
+  requestUser,
+  responseUser,
   message,
   createChat,
   receivedMessage,
@@ -49,6 +76,7 @@ export const packet = t.union([
 export type Ping = t.TypeOf<typeof ping>
 export type Pong = t.TypeOf<typeof pong>
 
+export type User = t.TypeOf<typeof user>
 export type Message = t.TypeOf<typeof message>
 export type ReceivedMessage = t.TypeOf<typeof receivedMessage>
 
