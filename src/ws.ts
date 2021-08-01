@@ -5,8 +5,20 @@ import * as IO from 'fp-ts/lib/IO'
 import * as O from 'fp-ts/lib/Option'
 import * as R from 'fp-ts/lib/Reader'
 import * as T from 'fp-ts/lib/Task'
-import { Agent, ClientRequest, ClientRequestArgs, IncomingMessage, OutgoingHttpHeaders } from 'http'
+import {
+  Agent,
+  ClientRequest,
+  ClientRequestArgs,
+  IncomingMessage,
+  OutgoingHttpHeaders,
+} from 'http'
+import * as PKT from 'shared/Packet'
+import * as UniqId from 'shared/UniqId'
 import WebSocket, { ServerOptions } from 'ws'
+
+const id = UniqId.createUniqId(1)
+export const getMessageId = id()
+export const pack = PKT.createPack(getMessageId)
 
 export type Client = WebSocket
 

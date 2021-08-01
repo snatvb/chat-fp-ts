@@ -8,10 +8,10 @@ import * as H from 'shared/helpers'
 import * as PKT from 'shared/Packet'
 
 import * as C from './client'
-import { pack } from './helpers'
 import * as MSG from './message'
 import * as SIO from './StoreIO'
 import * as uuid from './uuid'
+import { pack } from './ws'
 
 export type Chat = PKT.Chat
 
