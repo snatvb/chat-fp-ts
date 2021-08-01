@@ -42,7 +42,7 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
-    "fp-ts": "^2.11.0",
+    "fp-ts": "2.11.1",
     "io-ts": "^2.2.16",
     "monocle-ts": "^2.3.10",
     "uuid": "^8.3.2",
