@@ -14,7 +14,13 @@ import {
   RetryStatus,
 } from 'retry-ts'
 import { retrying } from 'retry-ts/lib/Task'
+import * as PKT from 'shared/Packet'
+import * as UniqId from 'shared/UniqId'
 import * as H from '~/helpers'
+
+const id = UniqId.createUniqId(2)
+export const getMessageId = id()
+export const pack = PKT.createPack(getMessageId)
 
 export class ServerUnreachedError extends Error {}
 export class TimeoutConnectionError extends Error {}
