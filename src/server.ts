@@ -10,6 +10,7 @@ import * as Chat from './chat'
 import * as C from './client'
 import * as Logger from './logger'
 import * as MSG from './message'
+import * as PH from './packetHandlers'
 import { ElementArrayOf } from './types'
 import * as WS from './ws'
 
@@ -41,29 +42,10 @@ const applyPackage =
     id: packetId,
   }: PKT.Packet): IOE.IOEither<Error, void> => {
     switch (packet.type) {
-      case 'ping':
-        return IOE.right<Error, void>(void 0)
-
       case 'request_create_chat':
-        return pipe(
-          Chat.make(packet.payload.title, client.id),
-          IO.chain(Chat.save),
-          IO.chain(Logger.inspect('Chat created')),
-          IO.chain(() => IOE.right<Error, void>(void 0)),
-        )
-
+        return PH.requestCreateChat(client, packet, packetId)
       case 'send_message':
-        return pipe(
-          packet.payload,
-          handleSaveMessage,
-          IO.chain(saveMsgInChat),
-          IO.chain(Logger.inspect('Added message to chat')),
-          IOE.chain(({ chat, message }) =>
-            pipe(message, Chat.sendMsgOut(chat), H.ioToIOE<Error>()),
-          ),
-          IOE.map(Logger.inspect('Sent out message')),
-          IOE.map(() => void 0),
-        )
+        return PH.sendMessage(client, packet, packetId)
 
       default:
         return IOE.left<Error, void>(

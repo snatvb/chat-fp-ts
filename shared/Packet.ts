@@ -102,9 +102,17 @@ export type Chat = t.TypeOf<typeof chat>
 export type User = t.TypeOf<typeof user>
 export type Message = t.TypeOf<typeof sendMessage>
 
+export type SendMessage = t.TypeOf<typeof sendMessage>
+export type RequestCreateChat = t.TypeOf<typeof requestCreateChat>
 export type ReceivedMessage = t.TypeOf<typeof receivedMessage>
 
 export type PacketMessage = t.TypeOf<typeof packetMessage>
+export type GetPropTypes<T extends {}, K extends keyof T> = T extends {
+  [P in keyof T as K]: infer U
+}
+  ? U
+  : never
+export type PacketType = GetPropTypes<PacketMessage, 'type'>
 export type Packet = t.TypeOf<typeof packet>
 
 export const parse = flow(
