@@ -46,6 +46,8 @@ const applyPackage =
         return PH.requestCreateChat(client, packet, packetId)
       case 'send_message':
         return PH.sendMessage(client, packet, packetId)
+      case 'request_user':
+        return PH.requestUser(client, packet, packetId)
 
       default:
         return IOE.left<Error, void>(
