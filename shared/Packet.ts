@@ -67,6 +67,31 @@ export const requestUser = t.type({
   payload: t.type({ id: t.string }),
 })
 
+export const requestRegisterUser = t.type({
+  type: t.literal('request_register_user'),
+  payload: t.type({
+    username: t.string,
+    displayName: t.string,
+    password: t.string,
+    avatar: t.union([t.string, t.undefined]),
+  }),
+})
+
+export const errorRequest = t.union([
+  t.type({
+    code: t.literal(400),
+    message: t.string,
+  }),
+  t.type({
+    code: t.literal(403),
+  }),
+])
+
+export const responseRegisterUser = t.type({
+  type: t.literal('request_register_user'),
+  payload: t.union([user, errorRequest]),
+})
+
 export const responseUser = t.type({
   type: t.literal('response_user'),
   payload: user,
@@ -102,6 +127,12 @@ export type Chat = t.TypeOf<typeof chat>
 export type User = t.TypeOf<typeof user>
 export type Message = t.TypeOf<typeof sendMessage>
 
+export type ErrorRequest = t.TypeOf<typeof errorRequest>
+export type RequestRegisterUser = t.TypeOf<typeof requestRegisterUser>
+export type ResponseRegisterUser = t.TypeOf<typeof responseRegisterUser>
+export type RequestUser = t.TypeOf<typeof requestUser>
+export type FindUser = t.TypeOf<typeof findUser>
+export type ResponseUser = t.TypeOf<typeof responseUser>
 export type SendMessage = t.TypeOf<typeof sendMessage>
 export type RequestCreateChat = t.TypeOf<typeof requestCreateChat>
 export type ReceivedMessage = t.TypeOf<typeof receivedMessage>
