@@ -19,6 +19,7 @@ import WebSocket, { ServerOptions } from 'ws'
 const id = UniqId.createUniqId(1)
 export const getMessageId = id()
 export const pack = PKT.createPack(getMessageId)
+export const responsePack = (id: number) => PKT.createPack(() => id)
 
 export type Client = WebSocket
 

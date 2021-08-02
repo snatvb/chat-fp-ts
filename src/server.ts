@@ -40,7 +40,7 @@ const applyPackage =
   ({
     payload: packet,
     id: packetId,
-  }: PKT.Packet): IOE.IOEither<Error, void> => {
+  }: PKT.Packet): IOE.IOEither<Error, unknown> => {
     switch (packet.type) {
       case 'request_create_chat':
         return PH.requestCreateChat(client, packet, packetId)

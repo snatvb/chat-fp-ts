@@ -1,3 +1,4 @@
+import * as E from 'fp-ts/lib/Either'
 import { flow, pipe } from 'fp-ts/lib/function'
 import * as IO from 'fp-ts/lib/IO'
 import * as IOE from 'fp-ts/lib/IOEither'
@@ -8,12 +9,14 @@ import * as Chat from './chat'
 import * as C from './client'
 import * as Logger from './logger'
 import * as MSG from './message'
+import * as U from './user'
+import * as WS from './ws'
 
 export type Handler<A extends PKT.PacketMessage> = (
   client: C.Client,
   pktMsg: A,
   messageId: number,
-) => IOE.IOEither<Error, void>
+) => IOE.IOEither<Error, unknown>
 
 export const requestCreateChat: Handler<PKT.RequestCreateChat> = (
   client,
@@ -41,7 +44,7 @@ export const saveMsgInChat = (msg: MSG.Message) =>
     IOE.map((res) => ({ ...res, message: msg })),
   )
 
-export const sendMessage: Handler<PKT.SendMessage> = (client, pktMsg) =>
+export const sendMessage: Handler<PKT.SendMessage> = (_, pktMsg) =>
   pipe(
     pktMsg.payload,
     handleSaveMessage,
@@ -51,5 +54,19 @@ export const sendMessage: Handler<PKT.SendMessage> = (client, pktMsg) =>
       pipe(message, Chat.sendMsgOut(chat), H.ioToIOE<Error>()),
     ),
     IOE.map(Logger.inspect('Sent out message')),
-    IOE.map(() => void 0),
+  )
+
+export const requestUser: Handler<PKT.RequestUser> = (
+  client,
+  pktMsg,
+  messageId,
+) =>
+  pipe(
+    pktMsg.payload.id,
+    U.get,
+    IOE.map(
+      (payload): PKT.ResponseUser => ({ type: 'response_user', payload }),
+    ),
+    IOE.chain(flow(WS.responsePack(messageId), H.ioToIOE<Error>())),
+    IOE.chain((packet) => pipe(packet, C.sendPKT(client), H.ioToIOE<Error>())),
   )

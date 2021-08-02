@@ -98,7 +98,7 @@ export const responseUser = t.type({
 })
 
 export const findUser = t.type({
-  type: t.literal('response_user'),
+  type: t.literal('find_user'),
   payload: t.type({
     username: t.string,
   }),
